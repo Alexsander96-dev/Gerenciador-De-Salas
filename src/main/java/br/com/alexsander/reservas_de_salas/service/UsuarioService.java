@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UsuarioService{
@@ -40,4 +41,11 @@ public class UsuarioService{
         Usuario usuario = usuarioRepository.getReferenceById(dto.id());
         usuario.atualizarDados(dto);
     }
+
+    public void deletar(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ValidacaoException("Usuário não encontrado!"));
+        usuarioRepository.delete(usuario);
+    }
+
 }
