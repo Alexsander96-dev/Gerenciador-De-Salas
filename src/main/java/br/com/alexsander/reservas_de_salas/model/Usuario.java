@@ -1,5 +1,6 @@
 package br.com.alexsander.reservas_de_salas.model;
 
+import br.com.alexsander.reservas_de_salas.dto.CadastroUsuarioDto;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -23,4 +24,17 @@ public class Usuario {
 
     @OneToMany(mappedBy = "usuario")
     private List<Reserva> reservas;
+
+    public Usuario(){}
+
+    public Usuario(CadastroUsuarioDto dto) {
+        this.nome = dto.nome();
+        this.email = dto.email();
+        this.telefone = dto.telefone();
+        this.tipoUsuario = dto.tipoUsuario();
+    }
+
+    public TipoUsuario getTipoUsuario() {
+        return tipoUsuario;
+    }
 }

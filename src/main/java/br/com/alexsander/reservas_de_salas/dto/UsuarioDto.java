@@ -1,0 +1,11 @@
+package br.com.alexsander.reservas_de_salas.dto;
+
+import br.com.alexsander.reservas_de_salas.model.TipoUsuario;
+import br.com.alexsander.reservas_de_salas.model.Usuario;
+
+public record UsuarioDto(TipoUsuario tipoUsuario) {
+
+    public UsuarioDto(Usuario usuario){
+        this(usuario.getTipoUsuario());
+    }
+}
