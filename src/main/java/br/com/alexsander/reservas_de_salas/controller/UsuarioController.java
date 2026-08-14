@@ -27,15 +27,22 @@ public class UsuarioController {
 
     @GetMapping("/tipo/{tipoUsuario}")
     public ResponseEntity<List<UsuarioDto>> listarPorTipoUsuario(@PathVariable TipoUsuario tipoUsuario){
-
         try {
             List<UsuarioDto> usuarios = usuarioService.listarUsuarioPorTipo(tipoUsuario);
             return ResponseEntity.ok(usuarios);
         } catch (ValidacaoException e) {
             return ResponseEntity.notFound().build();
         }
+    }
 
-
+    @GetMapping("/{id}")
+    public ResponseEntity<UsuarioDto> buscarPorId(@PathVariable Long id){
+        try {
+            UsuarioDto dto = usuarioService.buscarPorId(id);
+            return ResponseEntity.ok(dto);
+        }catch (ValidacaoException e){
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping

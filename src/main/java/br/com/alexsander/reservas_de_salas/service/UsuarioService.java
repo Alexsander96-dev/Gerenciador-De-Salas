@@ -7,13 +7,11 @@ import br.com.alexsander.reservas_de_salas.exception.ValidacaoException;
 import br.com.alexsander.reservas_de_salas.model.TipoUsuario;
 import br.com.alexsander.reservas_de_salas.model.Usuario;
 import br.com.alexsander.reservas_de_salas.repository.UsuarioRepository;
-import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 public class UsuarioService{
@@ -38,7 +36,8 @@ public class UsuarioService{
     }
 
     public void atualizar(AtualizarUsuarioDto dto) {
-        Usuario usuario = usuarioRepository.getReferenceById(dto.id());
+        Usuario usuario = usuarioRepository.findById(dto.id())
+                .orElseThrow(() -> new ValidacaoException("Usuário não encontrado"));
         usuario.atualizarDados(dto);
     }
 
@@ -48,4 +47,9 @@ public class UsuarioService{
         usuarioRepository.delete(usuario);
     }
 
+    public UsuarioDto buscarPorId(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ValidacaoException("Usuário não encontrado!"));
+        return new UsuarioDto(usuario);
+    }
 }
