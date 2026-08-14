@@ -1,5 +1,6 @@
 package br.com.alexsander.reservas_de_salas.service;
 
+import br.com.alexsander.reservas_de_salas.dto.AtualizarUsuarioDto;
 import br.com.alexsander.reservas_de_salas.dto.CadastroUsuarioDto;
 import br.com.alexsander.reservas_de_salas.dto.UsuarioDto;
 import br.com.alexsander.reservas_de_salas.exception.ValidacaoException;
@@ -33,5 +34,10 @@ public class UsuarioService{
             throw new ValidacaoException("Dados já cadastrado!");
         }
         usuarioRepository.save(new Usuario(dto));
+    }
+
+    public void atualizar(AtualizarUsuarioDto dto) {
+        Usuario usuario = usuarioRepository.getReferenceById(dto.id());
+        usuario.atualizarDados(dto);
     }
 }

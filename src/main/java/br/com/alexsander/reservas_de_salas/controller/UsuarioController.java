@@ -1,5 +1,6 @@
 package br.com.alexsander.reservas_de_salas.controller;
 
+import br.com.alexsander.reservas_de_salas.dto.AtualizarUsuarioDto;
 import br.com.alexsander.reservas_de_salas.dto.CadastroUsuarioDto;
 import br.com.alexsander.reservas_de_salas.dto.UsuarioDto;
 import br.com.alexsander.reservas_de_salas.exception.ValidacaoException;
@@ -45,7 +46,17 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         }catch (ValidacaoException e){
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
+    @PutMapping
+    @Transactional
+    public ResponseEntity<String> atualizar(@RequestBody @Valid AtualizarUsuarioDto dto){
+        try {
+            usuarioService.atualizar(dto);
+            return ResponseEntity.ok().build();
+        }catch (ValidacaoException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

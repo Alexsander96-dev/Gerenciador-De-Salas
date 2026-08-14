@@ -1,5 +1,6 @@
 package br.com.alexsander.reservas_de_salas.model;
 
+import br.com.alexsander.reservas_de_salas.dto.AtualizarUsuarioDto;
 import br.com.alexsander.reservas_de_salas.dto.CadastroUsuarioDto;
 import jakarta.persistence.*;
 
@@ -34,7 +35,31 @@ public class Usuario {
         this.tipoUsuario = dto.tipoUsuario();
     }
 
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public TipoUsuario getTipoUsuario() {
         return tipoUsuario;
+    }
+
+    public void atualizarDados(AtualizarUsuarioDto dto) {
+        if (dto.nome() != null){
+            this.nome = dto.nome();
+        }
+        if (dto.email() != null){
+            this.email = dto.email();
+        }
+        if (dto.telefone() != null){
+            this.telefone = dto.telefone();
+        }
     }
 }
