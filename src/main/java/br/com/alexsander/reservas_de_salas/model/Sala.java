@@ -25,4 +25,5 @@ public class Sala {
     @OneToMany(mappedBy = "sala")
     private List<Reserva> reservas;
 
+    public Sala(){}
 }
