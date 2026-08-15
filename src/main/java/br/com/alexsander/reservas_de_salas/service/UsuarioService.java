@@ -2,6 +2,7 @@ package br.com.alexsander.reservas_de_salas.service;
 
 import br.com.alexsander.reservas_de_salas.dto.AtualizarUsuarioDto;
 import br.com.alexsander.reservas_de_salas.dto.CadastroUsuarioDto;
+import br.com.alexsander.reservas_de_salas.dto.TipoUsuarioDto;
 import br.com.alexsander.reservas_de_salas.dto.UsuarioDto;
 import br.com.alexsander.reservas_de_salas.exception.ValidacaoException;
 import br.com.alexsander.reservas_de_salas.model.TipoUsuario;
@@ -19,15 +20,15 @@ public class UsuarioService{
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public List<UsuarioDto> listarUsuarioPorTipo(TipoUsuario tipoUsuario) {
+    public List<TipoUsuarioDto> listarUsuarioPorTipo(TipoUsuario tipoUsuario) {
        return usuarioRepository.findByTipoUsuario(tipoUsuario)
                 .stream()
-                .map(UsuarioDto::new)
+                .map(TipoUsuarioDto::new)
                 .toList();
     }
 
     public void cadastrar(CadastroUsuarioDto dto) {
-        boolean jaCadastrado = usuarioRepository.existsByNomeOrTelefoneOrEmail(dto.nome(),dto.telefone(),dto.email());
+        boolean jaCadastrado = usuarioRepository.existsByTelefoneOrEmail(dto.telefone(),dto.email());
 
         if (jaCadastrado){
             throw new ValidacaoException("Dados já cadastrado!");

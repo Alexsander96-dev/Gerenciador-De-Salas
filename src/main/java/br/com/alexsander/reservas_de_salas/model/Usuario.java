@@ -35,6 +35,7 @@ public class Usuario {
         this.tipoUsuario = dto.tipoUsuario();
     }
 
+
     public void setNome(String nome) {
         this.nome = nome;
     }
@@ -49,6 +50,18 @@ public class Usuario {
 
     public Long getId() {
         return id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public TipoUsuario getTipoUsuario() {
@@ -66,4 +79,6 @@ public class Usuario {
             this.telefone = dto.telefone();
         }
     }
+
+
 }
