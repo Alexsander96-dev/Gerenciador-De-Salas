@@ -5,6 +5,7 @@ import br.com.alexsander.reservas_de_salas.dto.SalaDto;
 import br.com.alexsander.reservas_de_salas.exception.ValidacaoException;
 import br.com.alexsander.reservas_de_salas.model.Sala;
 import br.com.alexsander.reservas_de_salas.model.StatusSala;
+import br.com.alexsander.reservas_de_salas.model.TipoSala;
 import br.com.alexsander.reservas_de_salas.model.Usuario;
 import br.com.alexsander.reservas_de_salas.repository.SalaRepository;
 import br.com.alexsander.reservas_de_salas.repository.UsuarioRepository;
@@ -12,6 +13,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class SalaService {
@@ -67,5 +70,19 @@ public class SalaService {
         Sala sala = salaRepository.findById(idSala)
                 .orElseThrow(() -> new ValidacaoException("Sala não encontrada!"));
         return new SalaDto(sala);
+    }
+
+    public List<SalaDto> listarSalasAtivasPorTipo(TipoSala tipoSala) {
+        return salaRepository.findByStatusSalaAndTipoSala(StatusSala.ATIVA,tipoSala)
+                .stream()
+                .map(SalaDto::new)
+                .toList();
+    }
+
+    public List<SalaDto> listarSalasAtivas() {
+        return salaRepository.findByStatusSala(StatusSala.ATIVA)
+                .stream()
+                .map(SalaDto::new)
+                .toList();
     }
 }

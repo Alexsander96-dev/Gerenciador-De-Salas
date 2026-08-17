@@ -5,6 +5,7 @@ import br.com.alexsander.reservas_de_salas.dto.SalaDto;
 import br.com.alexsander.reservas_de_salas.exception.ValidacaoException;
 import br.com.alexsander.reservas_de_salas.model.Sala;
 import br.com.alexsander.reservas_de_salas.model.StatusSala;
+import br.com.alexsander.reservas_de_salas.model.TipoSala;
 import br.com.alexsander.reservas_de_salas.service.SalaService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -62,4 +63,25 @@ public class SalaController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/listar")
+    public ResponseEntity<List<SalaDto>> listarSalasAtivasPorTipo(@RequestParam TipoSala tipoSala){
+        try {
+            List<SalaDto> salas = salaService.listarSalasAtivasPorTipo(tipoSala);
+            return ResponseEntity.ok(salas);
+        }catch (ValidacaoException e){
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/listar/ativas")
+    public ResponseEntity<List<SalaDto>> listarAtivas(){
+        try {
+            List<SalaDto> salasAtivas = salaService.listarSalasAtivas();
+            return ResponseEntity.ok(salasAtivas);
+        }catch (ValidacaoException e){
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }
