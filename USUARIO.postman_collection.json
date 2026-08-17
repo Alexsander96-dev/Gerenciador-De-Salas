@@ -1,129 +1,217 @@
 {
 	"info": {
-		"_postman_id": "b1e2c3d4-1234-4a5b-9c8d-usuario0001",
-		"name": "SISTEMA-RESERVA-SALAS",
+		"name": "USUARIO",
+		"description": "Collection de testes do UsuarioController — casos de sucesso e de erro, para observar as respostas da API.\n\nATENÇÃO: diferente do SalaController, o UsuarioController NÃO tem try/catch local (decisão registrada: sem @RestControllerAdvice ainda). Isso significa que toda ValidacaoException não tratada cai como 500 Internal Server Error genérico, não 400/404. Os casos de erro abaixo refletem esse comportamento — se você adicionar tratamento de exceção depois, os status esperados vão mudar.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080"
+		}
+	],
 	"item": [
 		{
-			"name": "USUARIO",
+			"name": "1. Cadastrar Usuario",
 			"item": [
 				{
-					"name": "Cadastrar usuario",
+					"name": "✅ Sucesso - Cadastrar usuário novo",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"nome\": \"Fulano da Silva\",\n    \"telefone\": \"11999999999\",\n    \"email\": \"fulano@email.com\",\n    \"tipoUsuario\": \"COMUM\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": "{\n  \"nome\": \"Fulano da Silva\",\n  \"telefone\": \"11999999999\",\n  \"email\": \"fulano@email.com\",\n  \"tipoUsuario\": \"COMUM\"\n}"
 						},
 						"url": {
-							"raw": "http://localhost:8080/usuarios",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"usuarios"
-							]
-						}
-					},
-					"response": []
+							"raw": "{{base_url}}/usuarios",
+							"host": ["{{base_url}}"],
+							"path": ["usuarios"]
+						},
+						"description": "Espera-se 200/201 (conferir o status real do método cadastrar no seu Controller) com corpo de sucesso."
+					}
 				},
 				{
-					"name": "Buscar usuario por id",
+					"name": "❌ Erro - Nome, telefone ou email já cadastrado",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Fulano da Silva\",\n  \"telefone\": \"11999999999\",\n  \"email\": \"fulano@email.com\",\n  \"tipoUsuario\": \"COMUM\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/usuarios",
+							"host": ["{{base_url}}"],
+							"path": ["usuarios"]
+						},
+						"description": "Rodar DEPOIS do caso de sucesso acima, com os mesmos dados. existsByNomeOrTelefoneOrEmail retorna true → ValidacaoException não tratada. Espera-se 500 Internal Server Error (sem @RestControllerAdvice, sem try/catch no Controller)."
+					}
+				},
+				{
+					"name": "❌ Erro - Validação de formato (telefone e email inválidos)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"\",\n  \"telefone\": \"abc\",\n  \"email\": \"nao-e-email\",\n  \"tipoUsuario\": \"COMUM\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/usuarios",
+							"host": ["{{base_url}}"],
+							"path": ["usuarios"]
+						},
+						"description": "Viola @NotBlank/@Email/regex de telefone do CadastroUsuarioDto. Espera-se 400 Bad Request — esse é tratado pelo próprio @Valid do Spring antes do Controller ser chamado, então não depende do try/catch."
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Buscar Usuario por Id",
+			"item": [
+				{
+					"name": "✅ Sucesso - Usuário existente",
 					"request": {
 						"method": "GET",
-						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/usuarios/1",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"usuarios",
-								"1"
-							]
-						}
-					},
-					"response": []
+							"raw": "{{base_url}}/usuarios/1",
+							"host": ["{{base_url}}"],
+							"path": ["usuarios", "1"]
+						},
+						"description": "Espera-se 200 OK com o UsuarioDto (id, nome, telefone, email, tipoUsuario)."
+					}
 				},
 				{
-					"name": "Listar usuarios por tipo",
+					"name": "❌ Erro - Id inexistente",
 					"request": {
 						"method": "GET",
-						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/usuarios/tipo/COMUM",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"usuarios",
-								"tipo",
-								"COMUM"
-							]
-						}
-					},
-					"response": []
+							"raw": "{{base_url}}/usuarios/99999",
+							"host": ["{{base_url}}"],
+							"path": ["usuarios", "99999"]
+						},
+						"description": "findById().orElseThrow(ValidacaoException) sem tratamento no Controller. Espera-se 500 Internal Server Error genérico (não 404)."
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Listar Usuarios por Tipo",
+			"item": [
+				{
+					"name": "✅ Sucesso - Tipo COMUM",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/usuarios/tipo/COMUM",
+							"host": ["{{base_url}}"],
+							"path": ["usuarios", "tipo", "COMUM"]
+						},
+						"description": "Espera-se 200 OK com lista de TipoUsuarioDto (id, nome, tipoUsuario)."
+					}
 				},
 				{
-					"name": "Atualizar usuario",
+					"name": "✅ Sucesso - Tipo sem nenhum usuário (lista vazia)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/usuarios/tipo/GESTOR",
+							"host": ["{{base_url}}"],
+							"path": ["usuarios", "tipo", "GESTOR"]
+						},
+						"description": "Espera-se 200 OK com lista vazia [] (não é erro, apenas nenhum resultado)."
+					}
+				},
+				{
+					"name": "❌ Erro - tipoUsuario inválido (valor fora do enum)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/usuarios/tipo/NAO_EXISTE",
+							"host": ["{{base_url}}"],
+							"path": ["usuarios", "tipo", "NAO_EXISTE"]
+						},
+						"description": "Valor não corresponde a nenhuma constante de TipoUsuario. Espera-se 400 Bad Request genérico (erro de conversão do Spring no @PathVariable, não passa pelo Service)."
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Atualizar Usuario",
+			"item": [
+				{
+					"name": "✅ Sucesso - Atualizar nome (parcial)",
 					"request": {
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 1,\n    \"nome\": \"Fulano da Silva Atualizado\",\n    \"telefone\": \"11988888888\",\n    \"email\": \"fulano.novo@email.com\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": "{\n  \"id\": 1,\n  \"nome\": \"Fulano da Silva Junior\",\n  \"telefone\": null,\n  \"email\": null\n}"
 						},
 						"url": {
-							"raw": "http://localhost:8080/usuarios",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"usuarios"
-							]
-						}
-					},
-					"response": []
+							"raw": "{{base_url}}/usuarios",
+							"host": ["{{base_url}}"],
+							"path": ["usuarios"]
+						},
+						"description": "Campos null não são alterados (atualizarDados). Espera-se 200 OK. Confirme o path — se o @PutMapping do Controller não tiver {id} na URL, o id vem só do corpo (AtualizarUsuarioDto)."
+					}
 				},
 				{
-					"name": "Deletar usuario",
+					"name": "❌ Erro - Id inexistente",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": 99999,\n  \"nome\": \"Nao Existe\",\n  \"telefone\": null,\n  \"email\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/usuarios",
+							"host": ["{{base_url}}"],
+							"path": ["usuarios"]
+						},
+						"description": "IMPORTANTE: no seu resumo, o método atualizar do Service ainda usa getReferenceById (não checa existência antes de atualizar) — pendência registrada como inconsistente com deletar/buscarPorId. Se ainda não foi corrigido, esse caso pode NÃO lançar erro na hora (referência preguiçosa), só quebrar depois, de forma confusa, ao tentar persistir. Vale testar e confirmar o comportamento real antes de assumir 500."
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Deletar Usuario",
+			"item": [
+				{
+					"name": "✅ Sucesso - Deletar usuário existente",
 					"request": {
 						"method": "DELETE",
-						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/usuarios/1",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"usuarios",
-								"1"
-							]
-						}
-					},
-					"response": []
+							"raw": "{{base_url}}/usuarios/1",
+							"host": ["{{base_url}}"],
+							"path": ["usuarios", "1"]
+						},
+						"description": "Espera-se 200/204 (conferir o status real do método deletar no seu Controller)."
+					}
+				},
+				{
+					"name": "❌ Erro - Id inexistente",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{base_url}}/usuarios/99999",
+							"host": ["{{base_url}}"],
+							"path": ["usuarios", "99999"]
+						},
+						"description": "findById().orElseThrow(ValidacaoException) sem tratamento no Controller. Espera-se 500 Internal Server Error genérico."
+					}
 				}
 			]
 		}

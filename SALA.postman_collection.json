@@ -1,0 +1,338 @@
+{
+  "info": {
+    "name": "SALA",
+    "description": "Collection de testes do SalaController — casos de sucesso e de erro, para observar as respostas da API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Cadastrar Sala",
+      "item": [
+        {
+          "name": "✅ Sucesso - Cadastrar sala nova",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": 1,\n  \"nome\": \"Sala Reunião 1\",\n  \"capacidade\": 10,\n  \"tipoSala\": \"REUNIAO\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/salas",
+              "host": ["{{base_url}}"],
+              "path": ["salas"]
+            },
+            "description": "Espera-se 201 Created com a mensagem 'Sala criada com sucesso!'"
+          }
+        },
+        {
+          "name": "❌ Erro - Nome de sala duplicado (mesmo usuário)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": 1,\n  \"nome\": \"Sala Reunião 1\",\n  \"capacidade\": 10,\n  \"tipoSala\": \"REUNIAO\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/salas",
+              "host": ["{{base_url}}"],
+              "path": ["salas"]
+            },
+            "description": "Rodar DEPOIS do caso de sucesso acima, com o mesmo usuarioId e nome. Espera-se 400 Bad Request: 'Não pode criar sala com nomes iguais!'"
+          }
+        },
+        {
+          "name": "❌ Erro - Usuário não encontrado",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": 99999,\n  \"nome\": \"Sala Fantasma\",\n  \"capacidade\": 5,\n  \"tipoSala\": \"EVENTO\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/salas",
+              "host": ["{{base_url}}"],
+              "path": ["salas"]
+            },
+            "description": "usuarioId inexistente. Espera-se 400 Bad Request: 'Usuário não encontrado!'"
+          }
+        },
+        {
+          "name": "❌ Erro - Validação de campos (capacidade negativa / nome em branco)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": 1,\n  \"nome\": \"\",\n  \"capacidade\": -3,\n  \"tipoSala\": \"REUNIAO\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/salas",
+              "host": ["{{base_url}}"],
+              "path": ["salas"]
+            },
+            "description": "Viola @NotBlank (nome) e @Positive (capacidade). Espera-se 400 Bad Request (erro de validação do @Valid, resposta genérica do Spring já que não há @RestControllerAdvice)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Buscar Sala por Id",
+      "item": [
+        {
+          "name": "✅ Sucesso - Sala existente",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/salas/1",
+              "host": ["{{base_url}}"],
+              "path": ["salas", "1"]
+            },
+            "description": "Espera-se 200 OK com o SalaDto (id, nome, capacidade, tipoSala, statusSala)."
+          }
+        },
+        {
+          "name": "❌ Erro - Id inexistente",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/salas/99999",
+              "host": ["{{base_url}}"],
+              "path": ["salas", "99999"]
+            },
+            "description": "Espera-se 404 Not Found (corpo vazio, controller usa .notFound().build())."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Listar Salas Ativas por Tipo",
+      "item": [
+        {
+          "name": "✅ Sucesso - Tipo REUNIAO",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/salas/listar?tipoSala=REUNIAO",
+              "host": ["{{base_url}}"],
+              "path": ["salas", "listar"],
+              "query": [
+                { "key": "tipoSala", "value": "REUNIAO" }
+              ]
+            },
+            "description": "Espera-se 200 OK com lista de SalaDto, todas com tipoSala=REUNIAO e statusSala=ATIVA."
+          }
+        },
+        {
+          "name": "✅ Sucesso - Tipo sem nenhuma sala ativa (lista vazia)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/salas/listar?tipoSala=FESTA",
+              "host": ["{{base_url}}"],
+              "path": ["salas", "listar"],
+              "query": [
+                { "key": "tipoSala", "value": "FESTA" }
+              ]
+            },
+            "description": "Espera-se 200 OK com lista vazia [] (não é erro, apenas nenhum resultado)."
+          }
+        },
+        {
+          "name": "❌ Erro - tipoSala inválido (valor fora do enum)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/salas/listar?tipoSala=NAO_EXISTE",
+              "host": ["{{base_url}}"],
+              "path": ["salas", "listar"],
+              "query": [
+                { "key": "tipoSala", "value": "NAO_EXISTE" }
+              ]
+            },
+            "description": "Valor não corresponde a nenhuma constante de TipoSala. Espera-se 400 Bad Request genérico (erro de conversão do Spring, sem tratamento local)."
+          }
+        },
+        {
+          "name": "❌ Erro - tipoSala ausente (parâmetro obrigatório faltando)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/salas/listar",
+              "host": ["{{base_url}}"],
+              "path": ["salas", "listar"]
+            },
+            "description": "@RequestParam sem valor default é obrigatório. Espera-se 400 Bad Request genérico."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Listar Todas as Salas Ativas",
+      "item": [
+        {
+          "name": "✅ Sucesso - Lista todas as salas ativas",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/salas/listar/ativas",
+              "host": ["{{base_url}}"],
+              "path": ["salas", "listar", "ativas"]
+            },
+            "description": "Espera-se 200 OK com lista de SalaDto de todos os tipos, todas com statusSala=ATIVA."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Atualizar Sala (Ativar/Desativar)",
+      "item": [
+        {
+          "name": "✅ Sucesso - Criador desativa a própria sala",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "\"INATIVA\""
+            },
+            "url": {
+              "raw": "{{base_url}}/salas/1/usuario/1",
+              "host": ["{{base_url}}"],
+              "path": ["salas", "1", "usuario", "1"]
+            },
+            "description": "idSala=1 criada pelo usuarioId=1 (mesmo usuário do cadastro de sucesso). Corpo é o enum StatusSala como string JSON crua. Espera-se 200 OK: 'Status da sala alterado com sucesso'."
+          }
+        },
+        {
+          "name": "❌ Erro - Usuário não é o criador da sala",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "\"ATIVA\""
+            },
+            "url": {
+              "raw": "{{base_url}}/salas/1/usuario/2",
+              "host": ["{{base_url}}"],
+              "path": ["salas", "1", "usuario", "2"]
+            },
+            "description": "idSala=1 pertence ao usuarioId=1, mas aqui tentamos alterar como usuarioId=2. Espera-se 400 Bad Request: 'você não é o criador da sala'."
+          }
+        },
+        {
+          "name": "❌ Erro - Sala inexistente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "\"ATIVA\""
+            },
+            "url": {
+              "raw": "{{base_url}}/salas/99999/usuario/1",
+              "host": ["{{base_url}}"],
+              "path": ["salas", "99999", "usuario", "1"]
+            },
+            "description": "Espera-se 400 Bad Request: 'Sala não encontrada!'"
+          }
+        },
+        {
+          "name": "❌ Erro - Usuário inexistente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "\"ATIVA\""
+            },
+            "url": {
+              "raw": "{{base_url}}/salas/1/usuario/99999",
+              "host": ["{{base_url}}"],
+              "path": ["salas", "1", "usuario", "99999"]
+            },
+            "description": "Espera-se 400 Bad Request: 'Usuário não encontrado!'"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Deletar Sala",
+      "item": [
+        {
+          "name": "✅ Sucesso - Criador deleta a própria sala",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/salas/1/usuario/1",
+              "host": ["{{base_url}}"],
+              "path": ["salas", "1", "usuario", "1"]
+            },
+            "description": "idSala criada pelo usuarioId=1. Espera-se 202 Accepted: 'Sala apagada com sucesso!'"
+          }
+        },
+        {
+          "name": "❌ Erro - Usuário não é o criador da sala",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/salas/1/usuario/2",
+              "host": ["{{base_url}}"],
+              "path": ["salas", "1", "usuario", "2"]
+            },
+            "description": "Rodar ANTES do caso de sucesso acima (senão a sala já não existe mais). usuarioId=2 não é o criador. Espera-se 400 Bad Request (corpo vazio)."
+          }
+        },
+        {
+          "name": "❌ Erro - Sala inexistente",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/salas/99999/usuario/1",
+              "host": ["{{base_url}}"],
+              "path": ["salas", "99999", "usuario", "1"]
+            },
+            "description": "Espera-se 400 Bad Request (corpo vazio, ValidacaoException 'Sala não encontrada!')."
+          }
+        },
+        {
+          "name": "❌ Erro - Usuário inexistente",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/salas/1/usuario/99999",
+              "host": ["{{base_url}}"],
+              "path": ["salas", "1", "usuario", "99999"]
+            },
+            "description": "Espera-se 400 Bad Request (corpo vazio, ValidacaoException 'Usuário não encontrado!')."
+          }
+        }
+      ]
+    }
+  ]
+}
