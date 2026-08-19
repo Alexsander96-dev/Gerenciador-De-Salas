@@ -68,4 +68,8 @@ public class Sala {
     public StatusSala getStatusSala() {
         return statusSala;
     }
+
+    public List<Reserva> getReservas() {
+        return reservas;
+    }
 }

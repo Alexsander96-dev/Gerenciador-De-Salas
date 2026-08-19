@@ -1,5 +1,6 @@
 package br.com.alexsander.reservas_de_salas.model;
 
+import br.com.alexsander.reservas_de_salas.dto.CadastroReservaDto;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -28,4 +29,40 @@ public class Reserva {
     private Usuario usuario;
 
     public Reserva(){}
+
+    public Reserva(CadastroReservaDto dto, Usuario usuario, Sala sala) {
+        this.dataHoraInicio = dto.dataHoraInicio();
+        this.dataHoraFim = dto.dataHoraFim();
+        this.status = StatusReserva.CONFIRMADA;
+        this.usuario = usuario;
+        this.sala = sala;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public LocalDateTime getDataHoraInicio() {
+        return dataHoraInicio;
+    }
+
+    public LocalDateTime getDataHoraFim() {
+        return dataHoraFim;
+    }
+
+    public StatusReserva getStatus() {
+        return status;
+    }
+
+    public Sala getSala() {
+        return sala;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setStatus(StatusReserva status) {
+        this.status = status;
+    }
 }

@@ -69,7 +69,7 @@ public class SalaController {
         try {
             List<SalaDto> salas = salaService.listarSalasAtivasPorTipo(tipoSala);
             return ResponseEntity.ok(salas);
-        }catch (ValidacaoException e){
+        }catch (RuntimeException e){
             return ResponseEntity.notFound().build();
         }
     }
